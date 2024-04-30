@@ -1,0 +1,60 @@
+<!-- https://url3470.getgrist.com/ls/click?upn=u001.EQyne4ncvdo56afn-2BVHnvafMXoSHfzu6OP13FOnzdWvaViD0mgwUpkK3nswZJMXJbTef8fFbBRmL4TlX6F29yCN4xDD9oRYbCGbxPPuMDTNxVXlVmSbf1bskbH6gsDkYKBBT18TpxtD4ra3KfBDPrA-3D-3DvYcw_Dc56ReDI5enw14-2FHGgyLXliq-2Fm3yjzJkNlJpZe-2Bkbd-2BnpT8vwJfRFqYIHVH9Dlcx54w4eyQkBhOyjZQipNZUJMlkGL-2F9CpNlwhapOsPBMNzcOmjvQQHqF7Hf0ewe-2BeowCNAUAZz8OIFHLxcW7-2Bwaf3GRId-2FWwNmr57vp9wzQbM1is7PReHePuiqPdaXlei8xh8HpevyNeol6-2FFPaa1B4yTFr19jAwYSpl07m4hQmRhsMGUnU8mIKtioYCGfSyjWF-2FJdh-2Ba-2BMwVrGtH5LpQ7ekiebCpzO2AB5U1dLCcnx97MD5Gt4I54pdPNl24SQhSfq9lStXHyT2FK8X7Fj8z-2B9qukh8efFjYPQXQMOTpxw3RZqxXb4Gx5yHAxSwJjNAJsovvxOJEAsM09bwTtMTplPzj3I5V79R1RCv8I2vWG5jfeNxRWtvQ4yEarfUTFeu9iLumP6cxpOXN905K-2FSBc3-2BrOUtZiTDKr4ySURsQipTe0Pbs6sBMwjeG5WFoy0vsIgyQIzxEX1dUtJhPfb6sxRNr7dIXqRG8k5D0aNcAmgO7ArOZf03e9Or0BouJauV29Uvhqe4a6mJFaOj8JbX6QtMDvOEtt45H9RpGIDbeQscoTx7gQJmJxnllhCd7DnRtKEUSDAIhpjo4sq276nWZZcnkYrlEcq9aGhtusLfjx2RF50GDVbe33rCipkiyh67DM8GEcvBDAo36wamn6UFATMnEZq7WfNKoAztZNIP221YDeeX0LBR1zhf5K4j1MEmnl3PhU2UGCEEDZYUiMm1TKSVsqWozpY0apcSxhLo5Y4to4xKudnTHxSUcL42VHW-2FpxXH9VAiNTM3t8GMm4thHMPS7sT0L2qwFJ3MEz1fVMNHPAv-2BP7YUvyE-2BR-2F5tAIMrCDG5Zba4vw1Gb9Bb62SHJA-2FL5Fno-2F4fQhoP06WG0ptTAu13UM2pwnNr4VGYmbfKg5iVHl-2FwTKtO0K9Of-2BaWFb-2F-2BPNv-2F5bqZaaWQbtS5jNWPBbBHUGLfU0UsHoil-2FySkbjRsD -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Timeline</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+      body,
+      html {
+        font-family: arial, sans-serif;
+        font-size: 10pt;
+      }
+      #visualization {
+        border: 1px solid lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="visualization"></div>
+
+    <script type="text/javascript">
+      var container = document.getElementById('visualization');
+      var options = {
+        stack: false
+      };
+      var timeline = new vis.Timeline(container, null, options);
+
+      grist.ready({
+        columns: [
+          { name: 'content', title: 'Content', optional: false, description: 'Some text', allowMultiple: false },
+          { name: 'start', title: 'Start', optional: false, type: 'Date', description: 'Some text', allowMultiple: false },
+          { name: 'end', title: 'End', optional: true, type: 'Date', description: 'Some text', allowMultiple: false },
+          { name: 'group', title: 'Group', optional: true, description: 'Some text', allowMultiple: false }
+        ],
+        requiredAccess: 'read table'
+      });
+
+      grist.onRecords(function (records, mappings) {
+        const items = grist.mapColumnNames(records);
+        const groups = Array.from(new Set(items.map((item) => item.group))).map((group, index) => ({ id: index, content: group }));
+
+        items.forEach((item) => {
+          const helper = groups.find((g) => g.content === item.group);
+          if (helper) {
+            item.group = helper.id; // replace the group name with the ID from helperList
+          }
+        });
+
+        const items_dataset = new vis.DataSet(items);
+        const groups_dataset = new vis.DataSet(groups);
+        timeline.setItems(items_dataset);
+        timeline.setGroups(groups_dataset);
+        timeline.fit();
+      });
+    </script>
+  </body>
+</html>
